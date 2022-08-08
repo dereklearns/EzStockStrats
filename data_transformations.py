@@ -18,7 +18,11 @@ def initialize_dataframe(datafile):
     data = pd.read_csv(datafile, index_col = 'Date')
 
     # Converting the dates from string to datetime format:
-    data.index = pd.to_datetime(data.index)
+    # Keep as time for intraday future data
+    # data.index = pd.to_datetime(data.index)
+    data.index = pd.to_datetime(data.index, utc=False)
+
+    # data.index = data.index.date
     # Check types
     # data.dtypes
     # data.shape
@@ -34,13 +38,11 @@ def format_ticker_url(ticker, base=None):
 def get_buy_dates(df):
     buy_dates = (df['Position'] == 1) & (df['Position'].shift(1) == 0)
     buy_axis_y= df.SMA[buy_dates]
-    buy_date_x = buy_axis_y.index
     return buy_axis_y
 
 def get_sell_dates(df):
     sell_dates = (df['Position'] == 0) & (df['Position'].shift(1) == 1)
     sell_axis_y = df.SMA[sell_dates]
- 
     return sell_axis_y
 
 def load_strategy(strategy_name, base_path=None):
@@ -48,7 +50,35 @@ def load_strategy(strategy_name, base_path=None):
         data = json.load(json_file)
         return data
 
+# Load strategy SMA/EMA for Basic Trading SMA cross
+def create_strategy_consts_1(df, sma, ema):
+    # Parse strategy constants from strategy selected strategy JSON 
+    # Add columns for EWM, SMA, SHORT, MED, LONG
+    # logging.info("Creating strategy constants for {}".format(strategy['strategy_name']))
+    # Parse SMA/EMA values from strategy JSON
+    SMA_CONST = int(sma)
+    EMA_CONST = int(ema)
 
+    # Create new columns for SMA & EMA
+    # Simple Moving Average:
+    # Exponential Weighted Average
+    df['SMA'] = df['Adj Close'].rolling(SMA_CONST).mean()
+    df['EMA'] = df['Adj Close'].ewm(span=EMA_CONST).mean()
+
+    # Load Short/Med/Long Term 50/100/200 to look for Bullish Breakout
+    # Parse SHORT/MED/LONG term values from strategy JSON
+    STANDARD_SHORT_TERM = int(50)
+    STANDARD_MED_TERM = int(100)
+    STANDARD_LONG_TERM = int(200)
+
+    # Create new columns for SHORT/MED/TERM from parsed Strategy JSON
+    df['SMA_ST'] = df['Adj Close'].rolling(STANDARD_SHORT_TERM).mean()
+    df['SMA_MT'] = df['Adj Close'].rolling(STANDARD_MED_TERM).mean()
+    df['SMA_LT'] = df['Adj Close'].rolling(STANDARD_LONG_TERM).mean()
+
+    df.dropna(inplace=True)
+
+    return df
 # Load strategy SMA/EMA for Basic Trading SMA cross
 def create_strategy_consts(df, strategy):
     # Parse strategy constants from strategy selected strategy JSON 
@@ -103,17 +133,19 @@ def create_signals_breakout(df):
 
     return df
 
-def get_stock_df(symbol):
+def get_stock_df(symbol, sma=20, ema=100):
     ticker = format_ticker_url(symbol) 
     data = initialize_dataframe(ticker)
     df = data.copy()  
     df = df['2010':]
     STRAT_DIR = '/home/derek/Repos/PythonStocks/' + 'Strategies/'
     strategy = load_strategy("BasicStrategy", base_path=STRAT_DIR)
-    df = create_strategy_consts(df, strategy)
+    # df = create_strategy_consts(df, strategy)
+    df = create_strategy_consts_1(df, sma, ema)
     long_positions = np.where(df['EMA'] > df['SMA'], 1, 0)
     df['Position'] = long_positions
-    df = create_signals_breakout(df)
+    print(df['Position'].sum())
+    # df = create_signals_breakout(df)
     return df
 
 def merge_buy_and_sell_dates(df):
