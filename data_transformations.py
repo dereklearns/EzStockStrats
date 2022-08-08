@@ -133,6 +133,15 @@ def create_signals_breakout(df):
 
     return df
 
+def create_buy_hold(df):
+    # The returns of the Buy and Hold strategy:
+    df['Hold'] = np.log(df['Adj Close'] / df['Adj Close'].shift(1))
+    # The returns of the Moving Average strategy:
+    df['Strategy'] = df['Position'].shift(1) * df['Hold']
+    # We need to get rid of the NaN generated in the first row:
+    df.dropna(inplace=True)
+    return df
+
 def get_stock_df(symbol, sma=20, ema=100):
     ticker = format_ticker_url(symbol) 
     data = initialize_dataframe(ticker)
@@ -145,8 +154,19 @@ def get_stock_df(symbol, sma=20, ema=100):
     long_positions = np.where(df['EMA'] > df['SMA'], 1, 0)
     df['Position'] = long_positions
     print(df['Position'].sum())
+    
     # df = create_signals_breakout(df)
+
+    df = create_buy_hold(df)
+    print(get_text_results(df))
+
     return df
+
+def get_text_results(df):
+    returns = np.exp(df[['Hold', 'Strategy']].sum()) - 1
+    print(f"Buy and hold return: {round(returns['Hold']*100,2)}%")
+    print(f"Strategy return: {round(returns['Strategy']*100,2)}%")
+    return returns
 
 def merge_buy_and_sell_dates(df):
     bdates = get_buy_dates(df)
