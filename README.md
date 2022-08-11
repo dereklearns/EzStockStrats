@@ -9,5 +9,5 @@ Simple webapp to view various strategies for buying and selling popular underlyi
 - - Create an API connection with...<service> to pull ticker data
 - As a user, I would like to know if this strategy is profitable
 - - Compare to holding index funds
-- - Compare to Buy & Hold strategies
-- - Output results to new .HTML div
+- - ~~Compare to Buy & Hold strategies~~
+- - ~~Output results to new .HTML div~~
