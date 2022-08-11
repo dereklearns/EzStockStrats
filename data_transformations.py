@@ -165,8 +165,12 @@ def get_stock_df(symbol, sma=20, ema=100):
 def get_text_results(df):
     returns = np.exp(df[['Hold', 'Strategy']].sum()) - 1
     print(f"Buy and hold return: {round(returns['Hold']*100,2)}%")
+    a =     f"Buy and hold return: {round(returns['Hold']*100,2)}%"
     print(f"Strategy return: {round(returns['Strategy']*100,2)}%")
-    return returns
+    b =    f"Strategy return: {round(returns['Strategy']*100,2)}%"
+    a = str(a)
+    b = str(b)
+    return [a,b]
 
 def merge_buy_and_sell_dates(df):
     bdates = get_buy_dates(df)
