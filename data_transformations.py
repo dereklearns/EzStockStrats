@@ -8,7 +8,8 @@ import logging
 # for f in os.listdir("/home/derek/Repos/PythonStocks/Tickers"):
 #     print(f)
 
-base = '/home/derek/Repos/PythonStocks/Tickers/'
+# base = '/home/derek/Repos/PythonStocks/Tickers/'
+base = '/Tickers/'
 ticker = 'GE'
 filename = base + ticker + '.csv'
 datafile = filename
