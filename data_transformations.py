@@ -5,11 +5,8 @@ import json
 import os
 import logging
 
-# for f in os.listdir("/home/derek/Repos/PythonStocks/Tickers"):
-#     print(f)
 
-# base = '/home/derek/Repos/PythonStocks/Tickers/'
-base = '/Tickers/'
+base = 'Tickers/'
 ticker = 'GE'
 filename = base + ticker + '.csv'
 datafile = filename
@@ -32,7 +29,7 @@ def initialize_dataframe(datafile):
 
 
 def format_ticker_url(ticker, base=None):
-    base = '/home/derek/Repos/PythonStocks/Tickers/'
+    base = 'Tickers/'
     result = "{}{}.csv".format(base, ticker)
     return result
 
@@ -46,7 +43,7 @@ def get_sell_dates(df):
     sell_axis_y = df.SMA[sell_dates]
     return sell_axis_y
 
-def load_strategy(strategy_name, base_path=None):
+def load_strategy(strategy_name, base_path='Strategies/'):
     with open(base_path + strategy_name + '.json') as json_file:
         data = json.load(json_file)
         return data
@@ -148,7 +145,7 @@ def get_stock_df(symbol, sma=20, ema=100):
     data = initialize_dataframe(ticker)
     df = data.copy()  
     df = df['2010':]
-    STRAT_DIR = '/home/derek/Repos/PythonStocks/' + 'Strategies/'
+    STRAT_DIR = 'Strategies/'
     strategy = load_strategy("BasicStrategy", base_path=STRAT_DIR)
     # df = create_strategy_consts(df, strategy)
     df = create_strategy_consts_1(df, sma, ema)
